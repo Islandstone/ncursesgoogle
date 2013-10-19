@@ -236,6 +236,10 @@ ui_loop:
 		if isEditMode {
 			c := C.getch()
 			switch c {
+			case C.KEY_LEFT:
+				C.form_driver(search_form, C.REQ_PREV_CHAR)
+			case C.KEY_RIGHT:
+				C.form_driver(search_form, C.REQ_NEXT_CHAR)
 			case 27: // Esc
 				err = nil
 				break ui_loop
@@ -279,14 +283,25 @@ ui_loop:
 				C.form_driver(search_form, C.REQ_END_LINE)
 				C.curs_set(1)
 				isEditMode = true
+			case C.KEY_DOWN:
+				if highlight < len(menu_list)-1 {
+					highlight += 1
+				}
 			case 'j':
 				if highlight < len(menu_list)-1 {
 					highlight += 1
+				}
+			case C.KEY_UP:
+				if highlight > 0 {
+					highlight -= 1
 				}
 			case 'k':
 				if highlight > 0 {
 					highlight -= 1
 				}
+			case 'q':
+				err = nil
+				break ui_loop
 			case '\n':
 				cmd := exec.Command(
 					browser_cmd, browser_args, menu_list[highlight].Url)
