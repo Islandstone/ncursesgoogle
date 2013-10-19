@@ -210,6 +210,11 @@ func main() {
 	C.initscr()
 	C.curs_set(0)
 	C.noecho()
+	C.keypad(C.stdscr, true)
+	C.cbreak()
+
+	C.start_color()
+	setup_colors()
 
 	var fields [2]*C.FIELD
 	fields[0] = C.new_field(1, 80, 17, C.int(xpos), 0, 0)
@@ -318,6 +323,10 @@ ui_loop:
 	C.unpost_form(search_form)
 	C.free_form(search_form)
 	C.free_field(fields[0])
+
+	C.echo()
+	C.nocbreak()
+	C.keypad(C.stdscr, false)
 
 	C.endwin()
 
