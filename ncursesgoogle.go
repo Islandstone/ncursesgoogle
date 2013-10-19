@@ -35,6 +35,8 @@ var art []string = []string{
 	"               |___/",
 }
 
+var colors map[int]map[int]int
+
 var (
 	browser_cmd  string = "aurora"
 	browser_args string = "-new-window"
@@ -65,6 +67,92 @@ func draw_menu(x, y int, items []MenuItem, highlight int) {
 		}
 		y += 1
 	}
+}
+
+func set_color(x, y, color int) {
+	if m, ok := colors[x]; ok {
+		m[y] = color
+	} else {
+		colors[x] = make(map[int]int)
+		colors[x][y] = color
+	}
+}
+
+func get_color(x, y int) (color int, err error) {
+	if _, ok := colors[x]; ok {
+		if color, ok = colors[x][y]; !ok {
+			err = errors.New("color for position not found")
+		}
+	} else {
+		err = errors.New("color for position not found")
+	}
+
+	return
+}
+
+func setup_colors() {
+	C.init_pair(1, C.COLOR_BLUE, C.COLOR_BLACK)
+	C.init_pair(2, C.COLOR_RED, C.COLOR_BLACK)
+	C.init_pair(3, C.COLOR_YELLOW, C.COLOR_BLACK)
+	C.init_pair(4, C.COLOR_GREEN, C.COLOR_BLACK)
+
+	colors = make(map[int]map[int]int)
+
+	// G
+	set_color(0, 0, 1)
+	set_color(0, 1, 1)
+	set_color(0, 2, 1)
+	set_color(0, 3, 1)
+
+	// o
+	set_color(5, 0, 2)
+	set_color(6, 1, 2)
+	set_color(5, 2, 2)
+	set_color(5, 3, 2)
+
+	// o
+	set_color(10, 0, 3)
+	set_color(10, 1, 3)
+	set_color(10, 2, 3)
+	set_color(10, 3, 3)
+
+	// g
+	set_color(15, 0, 1)
+	set_color(15, 1, 1)
+	set_color(15, 2, 1)
+	set_color(15, 3, 1)
+	set_color(15, 4, 1)
+
+	// l
+	set_color(20, 0, 4)
+	set_color(20, 1, 4)
+	set_color(20, 2, 4)
+	set_color(20, 3, 4)
+
+	// e
+	set_color(23, 0, 2)
+	set_color(23, 1, 2)
+	set_color(23, 2, 2)
+	set_color(22, 3, 2)
+}
+
+func draw_logo(xpos, ypos int) {
+	current_color := -1
+	for i, line := range art {
+		for j, char := range line {
+			if color, err := get_color(j, i); err == nil {
+				current_color = color
+				C.attron(C.COLOR_PAIR(C.int(color)))
+			}
+
+			C.mvaddch(C.int(ypos + i), C.int(xpos + j), C.chtype(char))
+		}
+	}
+
+	if current_color != -1 {
+		C.attroff(C.COLOR_PAIR(C.int(current_color)))
+	}
+
 }
 
 func doQuery(query string) (response Response, err error) {
@@ -130,11 +218,7 @@ func main() {
 	var search_form *C.FORM = C.new_form(&fields[0])
 	C.post_form(search_form)
 
-	y := 10
-	for _, item := range art {
-		C.mvaddstr(C.int(y), C.int(xpos), C.CString(item))
-		y += 1
-	}
+	draw_logo(xpos, 10)
 
 	if len(os.Args) <= 1 {
 		isEditMode = true
