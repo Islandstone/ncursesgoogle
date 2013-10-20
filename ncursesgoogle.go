@@ -270,6 +270,9 @@ ui_loop:
 			case '\t':
 				isEditMode = false
 				C.curs_set(0)
+			case C.KEY_BACKSPACE:
+				C.form_driver(search_form, C.REQ_PREV_CHAR)
+				C.form_driver(search_form, C.REQ_DEL_CHAR)
 			case 127: // Backspace
 				C.form_driver(search_form, C.REQ_PREV_CHAR)
 				C.form_driver(search_form, C.REQ_DEL_CHAR)
